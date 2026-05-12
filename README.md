@@ -9,7 +9,7 @@
 
 > ⚡ **Watch a 2‑minute demo** – see how ClaudeFree installs everything and gets you coding with AI for free.
 > 
-> [![Youtube Video](https://github.com/user-attachments/assets/52499eb3-abe6-4fce-bb6d-6e8c5e7db4f9)](https://www.youtube.com/watch?v=kDXcy8UazKM)
+> ### [Here](https://www.youtube.com/watch?v=kDXcy8UazKM)
 
 
 
@@ -30,6 +30,21 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://git
 No prerequisites – it does everything on its own.  
 Auto-detects your OS and architecture.  
 Supported: macOS (Apple Silicon), all Linux distros, all Windows versions.
+
+
+## Binary to bash script Guide:
+
+Curious about what's inside the compiled `binary` files? Since SHC is just an obfuscator, the original script can be recovered. Use [UnSHc](https://github.com/yanncam/UnSHc) (works on SHC versions < 4.0.3):
+
+```bash
+git clone https://github.com/yanncam/UnSHc.git
+cd UnSHc
+make
+./unshc.sh /path/to/setup_claude_free.cdf -o recovered_script.sh
+```
+
+### Check out workflow file for more details
+
 
 ## Support
 
