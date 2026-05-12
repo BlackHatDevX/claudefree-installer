@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](https://github.com/BlackHatDevX/claudefree-installer)
 
-**One‑command setup for Claude Code with unlimited free AI in VS Code. No credit card required. No token limits.**
+**One‑command setup for Claude Code with unlimited free tokens in VS Code. No credit card required. No token limits.**
 
 > ⚡ **Watch a 2‑minute demo** – see how ClaudeFree installs everything and gets you coding with AI for free.
 > 
