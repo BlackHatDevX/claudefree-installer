@@ -7,6 +7,10 @@
 
 **One‑command setup for Claude Code with unlimited free AI in VS Code. No credit card required. No token limits.**
 
+> ⚡ **Watch a 2‑minute demo** – see how ClaudeFree installs everything and gets you coding with AI for free.
+> [![Youtube Video](https://github.com/user-attachments/assets/d1b72f30-fd40-4e39-aaab-8a3b666cad33)](https://www.youtube.com/watch?v=kDXcy8UazKM)
+
+
 ## Install
 
 ### Linux / macOS (bash)
