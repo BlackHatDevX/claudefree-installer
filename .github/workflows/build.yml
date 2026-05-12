@@ -9,71 +9,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Linux x86_64
-          - source_name: setup.sh
-            os: ubuntu-22.04
+          - os: ubuntu-22.04
             arch: x86_64
             target: setup_linux_x86_64
-            secret: SETUP_BASH_SCRIPT_CONTENT
-          # Linux ARM64
-          - source_name: setup.sh
-            os: ubuntu-22.04
+            source_name: setup.sh
+          - os: ubuntu-22.04
             arch: aarch64
             target: setup_linux_arm64
-            secret: SETUP_BASH_SCRIPT_CONTENT
-          # Windows (universal)
-          - source_name: setup.ps1
-            os: windows-latest
+            source_name: setup.sh
+          - os: windows-latest
             target: setup_windows.exe
-            secret: SETUP_WINDOWS_SCRIPT_CONTENT
+            source_name: setup.ps1
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      # ===== SECRET VALIDATION =====
-      - name: Validate secret (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        env:
-          SECRET_VALUE: ${{ secrets[matrix.secret] }}
-        run: |
-          if [[ -z "$SECRET_VALUE" ]]; then
-            echo "❌ Secret '${{ matrix.secret }}' not set"
-            exit 1
-          fi
-          echo "✅ Secret present"
-
-      - name: Validate secret (Unix)
+      - name: Make script executable (Unix)
         if: matrix.os != 'windows-latest'
-        env:
-          SECRET_VALUE: ${{ secrets[matrix.secret] }}
-        run: |
-          if [[ -z "$SECRET_VALUE" ]]; then
-            echo "❌ Secret '${{ matrix.secret }}' not set"
-            exit 1
-          fi
-          echo "✅ Secret present"
+        run: chmod +x ${{ matrix.source_name }}
 
-      # ===== WRITE SCRIPT FROM SECRET =====
-      - name: Write script (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        env:
-          SCRIPT: ${{ secrets[matrix.secret] }}
-        run: |
-          printf '%s' "$SCRIPT" > "${{ matrix.source_name }}"
-          echo "Written ${{ matrix.source_name }}"
-      - name: Write script (Unix)
-        if: matrix.os != 'windows-latest'
-        env:
-          SCRIPT: ${{ secrets[matrix.secret] }}
-        run: |
-          printf '%s' "$SCRIPT" > "${{ matrix.source_name }}"
-          chmod +x "${{ matrix.source_name }}"
-          echo "Written ${{ matrix.source_name }}"
-
-      # ===== LINUX: install shc & cross-compiler =====
       - name: Install shc (Linux)
         if: matrix.os == 'ubuntu-22.04'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq shc
@@ -84,29 +39,20 @@ jobs:
           sudo apt-get install -y -qq gcc-aarch64-linux-gnu
           echo "CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
 
-      # ===== BUILD LINUX (shc) =====
       - name: Build Linux binary
         if: matrix.os == 'ubuntu-22.04'
-        run: |
-          shc -r -f "${{ matrix.source_name }}" -o "${{ matrix.target }}"
-          echo "Built ${{ matrix.target }}"
+        run: shc -r -f ${{ matrix.source_name }} -o ${{ matrix.target }}
 
-      # ===== WINDOWS: install ps2exe & build =====
       - name: Install ps2exe (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
-        run: |
-          Install-Module -Name ps2exe -Force -Scope CurrentUser
-          Write-Host "ps2exe installed"
+        run: Install-Module -Name ps2exe -Force -Scope CurrentUser
 
       - name: Build Windows EXE
         if: matrix.os == 'windows-latest'
         shell: pwsh
-        run: |
-          Invoke-ps2exe -InputFile "${{ matrix.source_name }}" -OutputFile "${{ matrix.target }}" -requireAdmin
-          Write-Host "Built ${{ matrix.target }}"
+        run: Invoke-ps2exe -InputFile ${{ matrix.source_name }} -OutputFile ${{ matrix.target }} -requireAdmin
 
-      # ===== UPLOAD ARTIFACT =====
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
