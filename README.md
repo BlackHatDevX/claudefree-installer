@@ -9,7 +9,8 @@
 
 > ⚡ **Watch a 2‑minute demo** – see how ClaudeFree installs everything and gets you coding with AI for free.
 > 
-> [![Youtube Video](https://github.com/user-attachments/assets/d1b72f30-fd40-4e39-aaab-8a3b666cad33)](https://www.youtube.com/watch?v=kDXcy8UazKM)
+> [![Youtube Video](https://github.com/user-attachments/assets/52499eb3-abe6-4fce-bb6d-6e8c5e7db4f9)](https://www.youtube.com/watch?v=kDXcy8UazKM)
+
 
 
 ## Install
