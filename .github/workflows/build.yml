@@ -1,0 +1,151 @@
+name: Build Binaries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux x86_64
+          - source_name: setup.sh
+            os: ubuntu-22.04
+            arch: x86_64
+            target: setup_linux_x86_64
+            secret: SETUP_BASH_SCRIPT_CONTENT
+          # Linux ARM64
+          - source_name: setup.sh
+            os: ubuntu-22.04
+            arch: aarch64
+            target: setup_linux_arm64
+            secret: SETUP_BASH_SCRIPT_CONTENT
+          # Windows (universal)
+          - source_name: setup.ps1
+            os: windows-latest
+            target: setup_windows.exe
+            secret: SETUP_WINDOWS_SCRIPT_CONTENT
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # ===== SECRET VALIDATION (unchanged) =====
+      - name: Validate secret (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        env:
+          SECRET_VALUE: ${{ secrets[matrix.secret] }}
+        run: |
+          if [[ -z "$SECRET_VALUE" ]]; then
+            echo "❌ Secret '${{ matrix.secret }}' not set"
+            exit 1
+          fi
+          echo "✅ Secret present"
+
+      - name: Validate secret (Unix)
+        if: matrix.os != 'windows-latest'
+        env:
+          SECRET_VALUE: ${{ secrets[matrix.secret] }}
+        run: |
+          if [[ -z "$SECRET_VALUE" ]]; then
+            echo "❌ Secret '${{ matrix.secret }}' not set"
+            exit 1
+          fi
+          echo "✅ Secret present"
+
+      # ===== WRITE SCRIPT FROM SECRET =====
+      - name: Write script (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        env:
+          SCRIPT: ${{ secrets[matrix.secret] }}
+        run: |
+          printf '%s' "$SCRIPT" > "${{ matrix.source_name }}"
+          echo "Written ${{ matrix.source_name }}"
+      - name: Write script (Unix)
+        if: matrix.os != 'windows-latest'
+        env:
+          SCRIPT: ${{ secrets[matrix.secret] }}
+        run: |
+          printf '%s' "$SCRIPT" > "${{ matrix.source_name }}"
+          chmod +x "${{ matrix.source_name }}"
+          echo "Written ${{ matrix.source_name }}"
+
+      # ===== LINUX: install shc & cross-compiler =====
+      - name: Install shc (Linux)
+        if: matrix.os == 'ubuntu-22.04'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq shc
+
+      - name: Setup cross-compiler for ARM64
+        if: matrix.os == 'ubuntu-22.04' && matrix.arch == 'aarch64'
+        run: |
+          sudo apt-get install -y -qq gcc-aarch64-linux-gnu
+          echo "CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+
+      # ===== BUILD LINUX (shc) =====
+      - name: Build Linux binary
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          shc -r -f "${{ matrix.source_name }}" -o "${{ matrix.target }}"
+          echo "Built ${{ matrix.target }}"
+
+      # ===== WINDOWS: install ps2exe & build =====
+      - name: Install ps2exe (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Install-Module -Name ps2exe -Force -Scope CurrentUser
+          Write-Host "ps2exe installed"
+
+      - name: Build Windows EXE
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Invoke-ps2exe -InputFile "${{ matrix.source_name }}" -OutputFile "${{ matrix.target }}" -requireAdmin
+          Write-Host "Built ${{ matrix.target }}"
+
+      # ===== UPLOAD ARTIFACT =====
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ matrix.target }}
+          retention-days: 1
+
+  release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Copy to bin/
+        run: |
+          mkdir -p bin
+          cp artifacts/*/* bin/
+          ls -la bin/
+      - name: Commit and push
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add bin/
+          git diff --staged --quiet && exit 0
+          git commit -m "ci: add compiled binaries $(date +'%Y-%m-%d')"
+          git push
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: ClaudeFree v${{ github.run_number }}
+          draft: true
+          generate_release_notes: true
+          files: bin/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
