@@ -43,4 +43,4 @@ Supported: macOS (Apple Silicon), all Linux distros, all Windows versions.
 ## License
 
 [Read License](https://github.com/BlackHatDevX/claudefree-installer/blob/main/LICENSE)  
-Source Available — Personal Use Only. Commercial use, redistribution, and resale prohibited.
+Source Available
