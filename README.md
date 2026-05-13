@@ -38,7 +38,7 @@ Supported: macOS (Apple Silicon), all Linux distros, all Windows versions.
 
 Some people noticed the repo contains executables and asked where the actual source code is.
 
-fair question honestly 🙌
+fair question honestly 
 
 the executables are built automatically through GitHub Actions CI/CD — they are not manually generated mystery binaries.
 
@@ -54,7 +54,7 @@ the actual source those binaries are compiled from is here:
 and yes  
 the person committing those binaries is the highly trustworthy gentleman known as:
 
-`github-actions[bot]` 😭🙏
+`github-actions[bot]` 
 
 you can literally trace the whole pipeline and verify how everything gets generated from source.
 
