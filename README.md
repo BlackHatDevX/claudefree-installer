@@ -32,7 +32,31 @@ Auto-detects your OS and architecture.
 Supported: macOS (Apple Silicon), all Linux distros, all Windows versions.
 
 
-### Check out workflow file for more details
+## Q&A
+
+### Where’s the source code?
+
+Some people noticed the repo contains executables and asked where the actual source code is.
+
+fair question honestly 🙌
+
+the executables are built automatically through GitHub Actions CI/CD — they are not manually generated mystery binaries.
+
+this workflow is responsible for generating them and pushing them into the `bin` folder:
+
+https://github.com/BlackHatDevX/claudefree-installer/blob/main/.github/workflows/build.yml
+
+the actual source those binaries are compiled from is here:
+
+- https://github.com/BlackHatDevX/claudefree-installer/blob/main/setup.ps1
+- https://github.com/BlackHatDevX/claudefree-installer/blob/main/setup.sh
+
+and yes  
+the person committing those binaries is the highly trustworthy gentleman known as:
+
+`github-actions[bot]` 😭🙏
+
+you can literally trace the whole pipeline and verify how everything gets generated from source.
 
 
 ## Support
@@ -43,4 +67,3 @@ Supported: macOS (Apple Silicon), all Linux distros, all Windows versions.
 ## License
 
 [Read License](https://github.com/BlackHatDevX/claudefree-installer/blob/main/LICENSE)  
-Source Available
